@@ -1,11 +1,11 @@
 import request from '@/utils/request'
 
-export function login(username, password) {
+export function login(phone, password) {
   return request({
-    url: '/admin/login',
+    url: '/office/seller/login',
     method: 'post',
     data: {
-      username,
+      phone,
       password
     }
   })
@@ -13,8 +13,8 @@ export function login(username, password) {
 
 export function getInfo() {
   return request({
-    url: '/admin/info',
-    method: 'get',
+    url: '/office/seller/getSellerInfo',
+    method: 'post',
   })
 }
 

@@ -1,11 +1,5 @@
 import request from '@/utils/request'
-export function fetchList(params) {
-  return request({
-    url:'/flash/list',
-    method:'get',
-    params:params
-  })
-}
+
 export function updateStatus(id,params) {
   return request({
     url:'/flash/update/status/'+id,
@@ -13,12 +7,7 @@ export function updateStatus(id,params) {
     params:params
   })
 }
-export function deleteFlash(id) {
-  return request({
-    url:'/flash/delete/'+id,
-    method:'post'
-  })
-}
+
 export function createFlash(data) {
   return request({
     url:'/flash/create',

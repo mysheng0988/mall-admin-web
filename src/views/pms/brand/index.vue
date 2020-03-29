@@ -4,18 +4,19 @@
         <div>
           <i class="el-icon-search"></i>
           <span>筛选搜索</span>
-          <el-button
-            style="float: right"
-            @click="searchBrandList()"
-            type="primary"
-            size="small">
-            查询结果
-          </el-button>
         </div>
         <div style="margin-top: 15px">
           <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
             <el-form-item label="输入搜索：">
-              <el-input style="width: 203px" v-model="listQuery.keyword" placeholder="品牌名称/关键字"></el-input>
+              <el-input style="width: 203px" v-model="listQuery.keyword" placeholder="品牌名称/关键字" clearable></el-input>
+            </el-form-item>
+            <el-form-item :inline="true" size="small">
+              <el-button
+                @click="searchBrandList()"
+                type="primary"
+                size="small">
+                查询结果
+              </el-button>
             </el-form-item>
           </el-form>
         </div>
@@ -38,54 +39,31 @@
                 v-loading="listLoading"
                 border>
         <el-table-column type="selection" width="60" align="center"></el-table-column>
-        <el-table-column label="编号" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.id}}</template>
-        </el-table-column>
         <el-table-column label="品牌名称" align="center">
-          <template slot-scope="scope">{{scope.row.name}}</template>
+          <template slot-scope="scope">{{scope.row.brandName}}</template>
         </el-table-column>
-        <el-table-column label="品牌首字母" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.firstLetter}}</template>
+        <el-table-column label="品牌字母"  align="center">
+          <template slot-scope="scope">{{scope.row.brandPinyin}}</template>
         </el-table-column>
         <el-table-column label="排序" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.sort}}</template>
+          <template slot-scope="scope">{{scope.row.brandSort}}</template>
         </el-table-column>
-        <el-table-column label="品牌制造商" width="100" align="center">
+        <el-table-column label="logo图片" width="180" align="center">
           <template slot-scope="scope">
-            <el-switch
-              @change="handleFactoryStatusChange(scope.$index, scope.row)"
-              :active-value="1"
-              :inactive-value="0"
-              v-model="scope.row.factoryStatus">
-            </el-switch>
+            <el-image
+              style="width: 150px; height: 150px"
+              :src="imgUri+scope.row.logoPath"
+              fit="fit">
+            </el-image>
           </template>
         </el-table-column>
-        <el-table-column label="是否显示" width="100" align="center">
-          <template slot-scope="scope">
-            <el-switch
-              @change="handleShowStatusChange(scope.$index, scope.row)"
-              :active-value="1"
-              :inactive-value="0"
-              v-model="scope.row.showStatus">
-            </el-switch>
-          </template>
+        <el-table-column label="创建时间" width="180" align="center">
+          <template slot-scope="scope">{{scope.row.createDate}}</template>
         </el-table-column>
-        <el-table-column label="相关" width="220" align="center">
-          <template slot-scope="scope">
-            <span>商品：</span>
-            <el-button
-              size="mini"
-              type="text"
-              @click="getProductList(scope.$index, scope.row)">100
-            </el-button>
-            <span>评价：</span>
-            <el-button
-              size="mini"
-              type="text"
-              @click="getProductCommentList(scope.$index, scope.row)">1000
-            </el-button>
-          </template>
+        <el-table-column label="更新时间" width="180" align="center">
+          <template slot-scope="scope">{{scope.row.updateDate}}</template>
         </el-table-column>
+
         <el-table-column label="操作" width="200" align="center">
           <template slot-scope="scope">
             <el-button
@@ -101,26 +79,26 @@
         </el-table-column>
       </el-table>
     </div>
-    <div class="batch-operate-container">
-      <el-select
-        size="small"
-        v-model="operateType" placeholder="批量操作">
-        <el-option
-          v-for="item in operates"
-          :key="item.value"
-          :label="item.label"
-          :value="item.value">
-        </el-option>
-      </el-select>
-      <el-button
-        style="margin-left: 20px"
-        class="search-button"
-        @click="handleBatchOperate()"
-        type="primary"
-        size="small">
-        确定
-      </el-button>
-    </div>
+    <!--<div class="batch-operate-container">-->
+      <!--<el-select-->
+        <!--size="small"-->
+        <!--v-model="operateType" placeholder="批量操作">-->
+        <!--<el-option-->
+          <!--v-for="item in operates"-->
+          <!--:key="item.value"-->
+          <!--:label="item.label"-->
+          <!--:value="item.value">-->
+        <!--</el-option>-->
+      <!--</el-select>-->
+      <!--<el-button-->
+        <!--style="margin-left: 20px"-->
+        <!--class="search-button"-->
+        <!--@click="handleBatchOperate()"-->
+        <!--type="primary"-->
+        <!--size="small">-->
+        <!--确定-->
+      <!--</el-button>-->
+    <!--</div>-->
     <div class="pagination-container">
       <el-pagination
         background
@@ -129,38 +107,28 @@
         layout="total, sizes,prev, pager, next,jumper"
         :page-size="listQuery.pageSize"
         :page-sizes="[5,10,15]"
-        :current-page.sync="listQuery.pageNum"
+        :current-page.sync="listQuery.currentPage"
         :total="total">
       </el-pagination>
     </div>
   </div>
 </template>
 <script>
+  import img from '@/components/common'
   import {fetchList, updateShowStatus, updateFactoryStatus, deleteBrand} from '@/api/brand'
-
   export default {
     name: 'brandList',
     data() {
       return {
-        operates: [
-          {
-            label: "显示品牌",
-            value: "showBrand"
-          },
-          {
-            label: "隐藏品牌",
-            value: "hideBrand"
-          }
-        ],
-        operateType: null,
+        imgUri:img.imagePath,
         listQuery: {
           keyword: null,
-          pageNum: 1,
+          currentPage: 1,
           pageSize: 10
         },
         list: null,
         total: null,
-        listLoading: true,
+        listLoading: false,
         multipleSelection: []
       }
     },
@@ -170,12 +138,19 @@
     methods: {
       getList() {
         this.listLoading = true;
-        fetchList(this.listQuery).then(response => {
+        fetchList(this.listQuery).then(res => {
           this.listLoading = false;
-          this.list = response.data.list;
-          this.total = response.data.total;
-          this.totalPage = response.data.totalPage;
-          this.pageSize = response.data.pageSize;
+          if(res.code==0){
+            this.list = res.data.items;
+            this.total = res.data.totalNum;
+          }else {
+            this.list = [];
+            this.total =0;
+            this.$message.warning(res.msg)
+          }
+
+        }).catch(res=>{
+          this.listLoading = false;
         });
       },
       handleSelectionChange(val) {
@@ -244,16 +219,16 @@
         });
       },
       handleSizeChange(val) {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.listQuery.pageSize = val;
         this.getList();
       },
       handleCurrentChange(val) {
-        this.listQuery.pageNum = val;
+        this.listQuery.currentPage = val;
         this.getList();
       },
       searchBrandList() {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.getList();
       },
       handleBatchOperate() {

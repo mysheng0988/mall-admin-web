@@ -39,7 +39,7 @@ module.exports = {
       {
         test: /\.js$/,
         loader: 'babel-loader',
-        include: [resolve('src'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
+        include: [resolve('src'),resolve('src/icons'), resolve('test'), resolve('node_modules/webpack-dev-server/client')]
       },
       {
         test: /\.svg$/,
@@ -75,6 +75,10 @@ module.exports = {
         }
       }
     ]
+  },
+  externals:{
+    'AMap':'AMap',
+    'AMapUI':'AMapUI'
   },
   node: {
     // prevent webpack from injecting useless setImmediate polyfill because Vue

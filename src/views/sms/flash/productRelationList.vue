@@ -181,9 +181,9 @@
       }
     },
     created(){
-      this.listQuery.flashPromotionId=this.$route.query.flashPromotionId;
-      this.listQuery.flashPromotionSessionId=this.$route.query.flashPromotionSessionId;
-      this.getList();
+      //this.listQuery.flashPromotionId=this.$route.query.flashPromotionId;
+     // this.listQuery.flashPromotionSessionId=this.$route.query.flashPromotionSessionId;
+     // this.getList();
     },
     methods:{
       handleSizeChange(val) {

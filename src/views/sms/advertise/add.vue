@@ -1,5 +1,7 @@
 <template> 
-  <home-advertise-detail :isEdit="false"></home-advertise-detail>
+  <div class="app-container">
+    <home-advertise-detail :isEdit="false"></home-advertise-detail>
+  </div>
 </template>
 <script>
   import HomeAdvertiseDetail from './components/HomeAdvertiseDetail'

@@ -92,7 +92,7 @@
       return {
         list: null,
         total: null,
-        listLoading: true,
+        listLoading: false,
         listQuery: {
           pageNum: 1,
           pageSize: 5
@@ -111,7 +111,7 @@
       }
     },
     created() {
-      this.getList();
+      //this.getList();
     },
     methods: {
       getList() {

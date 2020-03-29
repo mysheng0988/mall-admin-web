@@ -4,19 +4,6 @@
       <div>
         <i class="el-icon-search"></i>
         <span>筛选搜索</span>
-        <el-button
-          style="float:right"
-          type="primary"
-          @click="handleSearchList()"
-          size="small">
-          查询搜索
-        </el-button>
-        <el-button
-          style="float:right;margin-right: 15px"
-          @click="handleResetSearch()"
-          size="small">
-          重置
-        </el-button>
       </div>
       <div style="margin-top: 15px">
         <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
@@ -63,6 +50,21 @@
             </el-select>
           </el-form-item>
         </el-form>
+      </div>
+      <div style="text-align: right">
+        <el-button
+          class="button"
+          @click="handleSearchList()"
+          type="primary"
+          size="small">
+          查询结果
+        </el-button>
+        <el-button
+          class="button"
+          @click="handleResetSearch()"
+          size="small">
+          重置
+        </el-button>
       </div>
     </el-card>
     <el-card class="operate-container" shadow="never">

@@ -1,5 +1,7 @@
 <template> 
-  <brand-detail :is-edit='false'></brand-detail>
+  <div class="app-container">
+    <brand-detail :is-edit='false'></brand-detail>
+  </div>
 </template>
 <script>
   import BrandDetail from './components/BrandDetail'

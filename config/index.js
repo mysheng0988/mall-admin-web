@@ -1,7 +1,4 @@
 'use strict'
-// Template version: 1.3.1
-// see http://vuejs-templates.github.io/webpack for documentation.
-
 const path = require('path')
 
 module.exports = {
@@ -10,7 +7,15 @@ module.exports = {
     // Paths
     assetsSubDirectory: 'static',
     assetsPublicPath: '/',
-    proxyTable: {},
+    proxyTable: {
+      '/office': {
+        target: 'http://localhost:9090',//后端接口地址
+        changeOrigin: true,//是否允许跨越
+        pathRewrite: {
+          '^/office': '/office',//重写,
+        }
+      }
+    },
 
     // Various Dev Server settings
     host: 'localhost', // can be overwritten by process.env.HOST
@@ -44,7 +49,15 @@ module.exports = {
     assetsRoot: path.resolve(__dirname, '../dist'),
     assetsSubDirectory: 'static',
     assetsPublicPath: './',
-
+    proxyTable: {
+      // '/office': {
+      //   target: 'http://172.31.50.4:9090',//后端接口地址
+      //   changeOrigin: true,//是否允许跨越
+      //   pathRewrite: {
+      //     '^/office': '/office',//重写,
+      //   }
+      // }
+    },
     /**
      * Source Maps
      */

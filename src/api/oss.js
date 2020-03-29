@@ -4,4 +4,13 @@ export function policy() {
     url:'/aliyun/oss/policy',
     method:'get',
   })
+
+}
+export function deleteFile(data) {
+  return request({
+    url:'/office/file/delete',
+    method:'post',
+    data:data
+  })
+
 }

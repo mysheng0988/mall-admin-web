@@ -103,7 +103,7 @@
       }
     },
     created() {
-      this.getList();
+      //this.getList();
     },
     filters:{
       formatTime(time) {

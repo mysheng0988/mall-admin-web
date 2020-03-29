@@ -1,9 +1,9 @@
 import request from '@/utils/request'
 export function fetchList(params) {
   return request({
-    url:'/home/advertise/list',
-    method:'get',
-    params:params
+    url:'/office/banner/terms',
+    method:'post',
+    data:params
   })
 }
 export function updateStatus(id,params) {
@@ -15,29 +15,23 @@ export function updateStatus(id,params) {
 }
 export function deleteHomeAdvertise(data) {
   return request({
-    url:'/home/advertise/delete',
+    url:'/office/banner/delete/'+data,
     method:'post',
-    data:data
   })
 }
-export function createHomeAdvertise(data) {
+export function getHomeAdvertise(data) {
   return request({
-    url:'/home/advertise/create',
+    url:'/office/banner/bannerId/'+data,
     method:'post',
-    data:data
   })
 }
-export function getHomeAdvertise(id) {
+export function saveHomeAdvertise(data) {
   return request({
-    url:'/home/advertise/'+id,
-    method:'get',
+    url:'/office/banner/save',
+    method:'post',
+    data:data
   })
 }
 
-export function updateHomeAdvertise(id,data) {
-  return request({
-    url:'/home/advertise/update/'+id,
-    method:'post',
-    data:data
-  })
-}
+
+

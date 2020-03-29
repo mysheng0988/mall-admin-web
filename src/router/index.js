@@ -5,22 +5,8 @@ Vue.use(Router)
 
 /* Layout */
 import Layout from '../views/layout/Layout'
-
-/**
- * hidden: true                   if `hidden:true` will not show in the sidebar(default is false)
- * alwaysShow: true               if set true, will always show the root menu, whatever its child routes length
- *                                if not set alwaysShow, only more than one route under the children
- *                                it will becomes nested mode, otherwise not show the root menu
- * redirect: noredirect           if `redirect:noredirect` will no redirct in the breadcrumb
- * name:'router-name'             the name is used by <keep-alive> (must set!!!)
- * meta : {
-    title: 'title'               the name show in submenu and breadcrumb (recommend set)
-    icon: 'svg-name'             the icon show in the sidebar,
-  }
- **/
 export const constantRouterMap = [
   {path: '/login', component: () => import('@/views/login/index'), hidden: true},
-  {path: '/404', component: () => import('@/views/404'), hidden: true},
   {
     path: '',
     component: Layout,
@@ -30,6 +16,18 @@ export const constantRouterMap = [
       name: 'home',
       component: () => import('@/views/home/index'),
       meta: {title: '首页', icon: 'home'}
+    },{
+      path: 'home/addShop',
+      name: 'home/addShop',
+      component: () => import('@/views/home/add'),
+      meta: {title: '添加店铺'},
+      hidden: true
+    },{
+      path: 'home/update',
+      name: 'home/update',
+      component: () => import('@/views/home/update'),
+      meta: {title: '店铺详情'},
+      hidden: true
     }]
   }
 ]
@@ -67,16 +65,16 @@ export const asyncRouterMap = [
         meta: {title: '商品分类', icon: 'product-cate'}
       },
       {
-        path: 'addProductCate',
-        name: 'addProductCate',
-        component: () => import('@/views/pms/productCate/add'),
+        path: 'addCustomClass',
+        name: 'addCustomClass',
+        component: () => import('@/views/pms/cutomClass/add'),
         meta: {title: '添加商品分类'},
         hidden: true
       },
       {
-        path: 'updateProductCate',
-        name: 'updateProductCate',
-        component: () => import('@/views/pms/productCate/update'),
+        path: 'updateCustomClass',
+        name: 'updateCustomClass',
+        component: () => import('@/views/pms/cutomClass/update'),
         meta: {title: '修改商品分类'},
         hidden: true
       },
@@ -184,6 +182,19 @@ export const asyncRouterMap = [
     ]
   },
   {
+    path: '',
+    name: '',
+    component: Layout,
+    redirect: '/IM',
+    children: [
+      {
+        path: 'shopIM',
+        name: 'shopIM',
+        component: () => import('@/views/IM/IM'),
+        meta: {title: '在线客服', icon: 'sms-flash'}
+      }],
+  },
+  {
     path:'/sms',
     component: Layout,
     redirect: '/sms/coupon',
@@ -191,10 +202,30 @@ export const asyncRouterMap = [
     meta: {title: '营销', icon: 'sms'},
     children: [
       {
+        path: 'advertise',
+        name: 'homeAdvertise',
+        component: () => import('@/views/sms/advertise/index'),
+        meta: {title: '广告列表', icon: 'sms-ad'}
+      },
+      {
+        path: 'addAdvertise',
+        name: 'addHomeAdvertise',
+        component: () => import('@/views/sms/advertise/add'),
+        meta: {title: '添加广告'},
+        hidden:true
+      },
+      {
+        path: 'updateAdvertise',
+        name: 'updateHomeAdvertise',
+        component: () => import('@/views/sms/advertise/update'),
+        meta: {title: '编辑广告'},
+        hidden:true
+      },
+      {
         path: 'flash',
         name: 'flash',
         component: () => import('@/views/sms/flash/index'),
-        meta: {title: '秒杀活动列表', icon: 'sms-flash'}
+        meta: {title: '秒杀商品列表', icon: 'sms-flash'}
       },
       {
         path: 'flashSession',
@@ -268,26 +299,7 @@ export const asyncRouterMap = [
         component: () => import('@/views/sms/subject/index'),
         meta: {title: '专题推荐', icon: 'sms-subject'}
       },
-      {
-        path: 'advertise',
-        name: 'homeAdvertise',
-        component: () => import('@/views/sms/advertise/index'),
-        meta: {title: '广告列表', icon: 'sms-ad'}
-      },
-      {
-        path: 'addAdvertise',
-        name: 'addHomeAdvertise',
-        component: () => import('@/views/sms/advertise/add'),
-        meta: {title: '添加广告'},
-        hidden:true
-      },
-      {
-        path: 'updateAdvertise',
-        name: 'updateHomeAdvertise',
-        component: () => import('@/views/sms/advertise/update'),
-        meta: {title: '编辑广告'},
-        hidden:true
-      }
+
     ]
   },
   {

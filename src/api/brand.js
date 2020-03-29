@@ -1,14 +1,14 @@
 import request from '@/utils/request'
-export function fetchList(params) {
+export function fetchList(data) {
   return request({
-    url:'/brand/list',
-    method:'get',
-    params:params
+    url:'/office/brand/terms',
+    method:'post',
+    data:data
   })
 }
-export function createBrand(data) {
+export function saveBrand(data) {
   return request({
-    url:'/brand/create',
+    url:'/office/brand/save',
     method:'post',
     data:data
   })
@@ -38,7 +38,7 @@ export function deleteBrand(id) {
 
 export function getBrand(id) {
   return request({
-    url:'/brand/'+id,
+    url:'/office/brand/'+id,
     method:'get',
   })
 }

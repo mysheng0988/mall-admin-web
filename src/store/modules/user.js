@@ -1,4 +1,4 @@
-import { login, logout, getInfo } from '@/api/login'
+import { login, logout,getInfo } from '@/api/login'
 import { getToken, setToken, removeToken } from '@/utils/auth'
 
 const user = {
@@ -27,39 +27,46 @@ const user = {
   actions: {
     // 登录
     Login({ commit }, userInfo) {
-      const username = userInfo.username.trim()
+      console.log(userInfo)
+      const username = userInfo.phone.trim()
       return new Promise((resolve, reject) => {
         login(username, userInfo.password).then(response => {
-          const data = response.data
-          const tokenStr = data.tokenHead+data.token
-          setToken(tokenStr)
-          commit('SET_TOKEN', tokenStr)
-          resolve()
+          if(response.code==0){
+            const data = response.data
+            const tokenStr =data.token
+            setToken(tokenStr)
+            commit('SET_NAME', data.loginName)
+            commit('SET_AVATAR', data.avatar)
+            commit('SET_TOKEN', tokenStr)
+            resolve(response)
+          }else {
+            resolve(response)
+          }
+
         }).catch(error => {
-          reject(error)
+          commit('SET_TOKEN', '')
+          resolve()
         })
       })
     },
-
     // 获取用户信息
     GetInfo({ commit, state }) {
       return new Promise((resolve, reject) => {
         getInfo().then(response => {
           const data = response.data
-          if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
-            commit('SET_ROLES', data.roles)
-          } else {
-            reject('getInfo: roles must be a non-null array !')
-          }
-          commit('SET_NAME', data.username)
-          commit('SET_AVATAR', data.icon)
+          // if (data.roles && data.roles.length > 0) { // 验证返回的roles是否是一个非空数组
+          //   commit('SET_ROLES', data.roles)
+          // } else {
+          //   reject('getInfo: roles must be a non-null array !')
+          // }
+          commit('SET_NAME', data.loginName)
+          commit('SET_AVATAR', data.avatar)
           resolve(response)
         }).catch(error => {
           reject(error)
         })
       })
     },
-
     // 登出
     LogOut({ commit, state }) {
       return new Promise((resolve, reject) => {

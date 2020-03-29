@@ -22,7 +22,7 @@ export default {
     },
     svgClass() {
       if (this.className) {
-        return 'svg-icon ' + this.className
+        return 'fill ' + this.className
       } else {
         return 'svg-icon'
       }
@@ -39,4 +39,9 @@ export default {
   fill: currentColor;
   overflow: hidden;
 }
+  .fill{
+    fill: currentColor;
+    vertical-align: -0.18em;
+    overflow: hidden;
+  }
 </style>

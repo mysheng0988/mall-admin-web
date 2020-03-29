@@ -47,6 +47,7 @@ export default {
   methods: {
     hasOneShowingChildren(children) {
       const showingChildren = children.filter(item => {
+        //console.log(item)
         return !item.hidden
       })
       if (showingChildren.length === 1) {

@@ -4,47 +4,27 @@
       <div>
         <i class="el-icon-search"></i>
         <span>筛选搜索</span>
-        <el-button
-          style="float: right"
-          @click="handleSearchList()"
-          type="primary"
-          size="small">
-          查询结果
-        </el-button>
-        <el-button
-          style="float: right;margin-right: 15px"
-          @click="handleResetSearch()"
-          size="small">
-          重置
-        </el-button>
       </div>
       <div style="margin-top: 15px">
         <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
           <el-form-item label="输入搜索：">
-            <el-input style="width: 203px" v-model="listQuery.keyword" placeholder="商品名称"></el-input>
+            <el-input style="width: 203px" v-model="listQuery.goodsName" placeholder="商品名称汉字或首字符"></el-input>
           </el-form-item>
-          <el-form-item label="商品货号：">
-            <el-input style="width: 203px" v-model="listQuery.productSn" placeholder="商品货号"></el-input>
+          <el-form-item label="商品编号：">
+            <el-input style="width: 203px" v-model="listQuery.goodsCode" placeholder="商品编号"></el-input>
           </el-form-item>
           <el-form-item label="商品分类：">
-            <el-cascader
+            <el-cascader style="width: 203px"
               clearable
               v-model="selectProductCateValue"
               :options="productCateOptions">
             </el-cascader>
           </el-form-item>
           <el-form-item label="商品品牌：">
-            <el-select v-model="listQuery.brandId" placeholder="请选择品牌" clearable>
-              <el-option
-                v-for="item in brandOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
+            <el-input style="width: 203px" v-model="listQuery.goodsBrand" placeholder="商品品牌"></el-input>
           </el-form-item>
           <el-form-item label="上架状态：">
-            <el-select v-model="listQuery.publishStatus" placeholder="全部" clearable>
+            <el-select style="width: 203px" v-model="listQuery.goodsState" placeholder="全部" clearable @clear="clearState(0)">
               <el-option
                 v-for="item in publishStatusOptions"
                 :key="item.value"
@@ -54,7 +34,7 @@
             </el-select>
           </el-form-item>
           <el-form-item label="审核状态：">
-            <el-select v-model="listQuery.verifyStatus" placeholder="全部" clearable>
+            <el-select  style="width: 203px" v-model="listQuery.examineState" @clear="clearState(1)" placeholder="全部" clearable>
               <el-option
                 v-for="item in verifyStatusOptions"
                 :key="item.value"
@@ -64,6 +44,22 @@
             </el-select>
           </el-form-item>
         </el-form>
+
+      </div>
+      <div style="text-align: right">
+        <el-button
+          class="button"
+          @click="handleSearchList()"
+          type="primary"
+          size="small">
+          查询结果
+        </el-button>
+        <el-button
+          class="button"
+          @click="handleResetSearch()"
+          size="small">
+          重置
+        </el-button>
       </div>
     </el-card>
     <el-card class="operate-container" shadow="never">
@@ -81,25 +77,121 @@
                 :data="list"
                 style="width: 100%"
                 @selection-change="handleSelectionChange"
+                @expand-change="handleToggleRow"
                 v-loading="listLoading"
                 border>
         <el-table-column type="selection" width="60" align="center"></el-table-column>
-        <el-table-column label="编号" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.id}}</template>
+        <el-table-column type="expand"
+                         label="SUK库存"
+                         width="100">
+          <template slot-scope="scope">
+            <el-table style="width: 100%"
+                      v-if="scope.row.goodsNorms.length>0"
+                      :data="scope.row.goodsNorms"
+                      border>
+              <el-table-column v-if='scope.row.goodsNorms[0].normsName1' :label="scope.row.goodsNorms[0].normsName1"
+                align="center">
+                <template slot-scope="props">
+                  <el-input v-model="props.row.normsValue1"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column
+                v-if="scope.row.goodsNorms[0].normsName2"
+                :label="scope.row.goodsNorms[0].normsName2"
+                align="center">
+                <template slot-scope="props">
+                  <el-input v-model="props.row.normsValue2"></el-input>
+                </template>
+              </el-table-column>
+
+              <el-table-column
+                label="价格"
+                width="120"
+                align="center">
+                <template slot-scope="props">
+                  <el-input v-model="props.row.goodsPrice"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="原价"
+                width="120"
+                align="center">
+                <template slot-scope="props">
+                  <el-input v-model="props.row.originalPrice"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="商品库存"
+                width="120"
+                align="center">
+                <template slot-scope="props">
+                  <el-input v-model="props.row.goodsStock"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="库存预警值"
+                width="100"
+                align="center">
+                <template slot-scope="props">
+                  <el-input v-model="props.row.stockWarning"></el-input>
+                </template>
+              </el-table-column>
+              <el-table-column
+                label="操作"
+                width="300"
+                align="center">
+                <template slot-scope="props">
+                    <el-button
+                      type="success"
+                      size="mini"
+                      @click="addNorms( props.row)">增加
+                    </el-button>
+                    <el-button
+                      type="primary"
+                      size="mini"
+                      @click="saveNorms(props.$index, props.row)">保存
+                    </el-button>
+
+                    <el-button
+                      type="warning"
+                      size="mini"
+                      @click="addSecKill(props.$index, props.row,scope.row.goodsMsg)">秒杀
+                    </el-button>
+                    <el-button
+                      type="danger"
+                      size="mini"
+                      @click="deleteNorms(props.$index, props.row,scope.row.goodsNorms)">删除
+                    </el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+           </template>
         </el-table-column>
-        <el-table-column label="商品图片" width="120" align="center">
-          <template slot-scope="scope"><img style="height: 80px" :src="scope.row.pic"></template>
+        <el-table-column label="商品编号" width="120" align="center">
+          <template slot-scope="scope">{{scope.row.goodsMsg.goodsCode}}</template>
         </el-table-column>
         <el-table-column label="商品名称" align="center">
           <template slot-scope="scope">
-            <p>{{scope.row.name}}</p>
-            <p>品牌：{{scope.row.brandName}}</p>
+            <p>{{scope.row.goodsMsg.goodsName}}</p>
+            <p>类型：{{scope.row.goodsMsg.classifyCode}}</p>
           </template>
         </el-table-column>
-        <el-table-column label="价格/货号" width="120" align="center">
+        <el-table-column label="图片" width="150" align="center">
           <template slot-scope="scope">
-            <p>价格：￥{{scope.row.price}}</p>
-            <p>货号：{{scope.row.productSn}}</p>
+            <viewer :images="scope.row.goodsImg" title="商品图片">
+              <div class="img-container">
+                <img  class="img" width="120" height="120"  v-for="(src,index) in scope.row.goodsImg"
+                     :key="index"
+                     :src="imgUri+scope.row.goodsImg[index].goodsImage"/>
+              </div>
+
+            </viewer>
+          </template>
+        </el-table-column>
+        <el-table-column label="价格/原价" width="130" align="center" >
+          <template slot-scope="scope" v-if="scope.row.goodsNorms.length>0">
+            <p>价格：￥{{scope.row.goodsNorms[0].goodsPrice}}</p>
+            <p>原价：￥{{scope.row.goodsNorms[0].originalPrice}}</p>
           </template>
         </el-table-column>
         <el-table-column label="标签" width="140" align="center">
@@ -109,7 +201,7 @@
                 @change="handlePublishStatusChange(scope.$index, scope.row)"
                 :active-value="1"
                 :inactive-value="0"
-                v-model="scope.row.publishStatus">
+                v-model="scope.row.goodsMsg.goodsState">
               </el-switch>
             </p>
             <p>新品：
@@ -117,7 +209,7 @@
                 @change="handleNewStatusChange(scope.$index, scope.row)"
                 :active-value="1"
                 :inactive-value="0"
-                v-model="scope.row.newStatus">
+                v-model="scope.row.goodsMsg.goodsNews">
               </el-switch>
             </p>
             <p>推荐：
@@ -125,25 +217,30 @@
                 @change="handleRecommendStatusChange(scope.$index, scope.row)"
                 :active-value="1"
                 :inactive-value="0"
-                v-model="scope.row.recommandStatus">
+                v-model="scope.row.goodsMsg.goodsRecommend">
+              </el-switch>
+            </p>
+            <p>预告：
+              <el-switch
+                @change="handleNoticeStatusChange(scope.$index, scope.row)"
+                :active-value="1"
+                :inactive-value="0"
+                v-model="scope.row.goodsMsg.goodsNotice">
               </el-switch>
             </p>
           </template>
         </el-table-column>
-        <el-table-column label="排序" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.sort}}</template>
-        </el-table-column>
-        <el-table-column label="SKU库存" width="100" align="center">
-          <template slot-scope="scope">
-            <el-button type="primary" icon="el-icon-edit" @click="handleShowSkuEditDialog(scope.$index, scope.row)" circle></el-button>
-          </template>
-        </el-table-column>
+        <!--<el-table-column label="SKU库存" width="100" align="center">-->
+          <!--<template slot-scope="scope">-->
+            <!--<el-button type="primary" icon="el-icon-edit" @click="handleShowSkuEditDialog(scope.$index, scope.row)" circle></el-button>-->
+          <!--</template>-->
+        <!--</el-table-column>-->
         <el-table-column label="销量" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.sale}}</template>
+          <template slot-scope="scope">{{scope.row.goodsMsg.salesVolume}}</template>
         </el-table-column>
         <el-table-column label="审核状态" width="100" align="center">
           <template slot-scope="scope">
-            <p>{{scope.row.verifyStatus | verifyStatusFilter}}</p>
+            <p>{{scope.row.goodsMsg.examineState | verifyStatusFilter}}</p>
             <p>
               <el-button
                 type="text"
@@ -193,7 +290,6 @@
       <el-button
         style="margin-left: 20px"
         class="search-button"
-        @click="handleBatchOperate()"
         type="primary"
         size="small">
         确定
@@ -207,106 +303,88 @@
         layout="total, sizes,prev, pager, next,jumper"
         :page-size="listQuery.pageSize"
         :page-sizes="[5,10,15]"
-        :current-page.sync="listQuery.pageNum"
+        :current-page.sync="listQuery.currentPage"
         :total="total">
       </el-pagination>
     </div>
-    <el-dialog
-      title="编辑货品信息"
-      :visible.sync="editSkuInfo.dialogVisible"
-      width="40%">
-      <span>商品货号：</span>
-      <span>{{editSkuInfo.productSn}}</span>
-      <el-input placeholder="按sku编号搜索" v-model="editSkuInfo.keyword" size="small" style="width: 50%;margin-left: 20px">
-        <el-button slot="append" icon="el-icon-search" @click="handleSearchEditSku"></el-button>
-      </el-input>
-      <el-table style="width: 100%;margin-top: 20px"
-                :data="editSkuInfo.stockList"
-                border>
-        <el-table-column
-          label="SKU编号"
-          align="center">
-          <template slot-scope="scope">
-            <el-input v-model="scope.row.skuCode"></el-input>
-          </template>
-        </el-table-column>
-        <el-table-column
-          v-for="(item,index) in editSkuInfo.productAttr"
-          :label="item.name"
-          :key="item.id"
-          align="center">
-          <template slot-scope="scope">
-            {{getProductSkuSp(scope.row,index)}}
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="销售价格"
-          width="80"
-          align="center">
-          <template slot-scope="scope">
-            <el-input v-model="scope.row.price"></el-input>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="商品库存"
-          width="80"
-          align="center">
-          <template slot-scope="scope">
-            <el-input v-model="scope.row.stock"></el-input>
-          </template>
-        </el-table-column>
-        <el-table-column
-          label="库存预警值"
-          width="100"
-          align="center">
-          <template slot-scope="scope">
-            <el-input v-model="scope.row.lowStock"></el-input>
-          </template>
-        </el-table-column>
-      </el-table>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="editSkuInfo.dialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="handleEditSkuConfirm">确 定</el-button>
-      </span>
-    </el-dialog>
+    <el-drawer
+      title="秒杀商品设置"
+      :visible.sync="drawer"
+      direction="rtl"
+      size="800px"
+      :before-close="handleClose">
+      <SecKill @closeDrawer="handleCloseDrawer" :sec-kill="secKill"></SecKill>
+    </el-drawer>
   </div>
 </template>
 <script>
+  let defaultGoodsNorms={
+    id:null,
+    goodsId:null,
+    normsName1:'',
+    normsValue1:'',
+    normsName2:'',
+    normsValue2: '',
+    originalPrice:0,
+    goodsPrice:0,
+    goodsStock:99,
+    goodsVolume:0,
+    stockWarning:9,
+    createDate:null,
+    updateDate:null,
+    comments:'',
+  }
+  import SecKill from '@/components/SecKill/index'
+  import { Message, MessageBox } from 'element-ui'
+  import img from '@/components/common'
   import {
     fetchList,
-    updateDeleteStatus,
-    updateNewStatus,
+    updateGoodsNorms,
+    deleteGoodsNorms,
+    saveGoodsNorms,
+    updateGoodsStatus,
+    updateNewsState,
+    deleteGoodsMsg,
     updateRecommendStatus,
-    updatePublishStatus
+    updateNoticeStatus,
   } from '@/api/product'
-  import {fetchList as fetchSkuStockList,update as updateSkuStockList} from '@/api/skuStock'
-  import {fetchList as fetchProductAttrList} from '@/api/productAttr'
   import {fetchList as fetchBrandList} from '@/api/brand'
-  import {fetchListWithChildren} from '@/api/productCate'
-
   const defaultListQuery = {
-    keyword: null,
-    pageNum: 1,
-    pageSize: 5,
-    publishStatus: null,
-    verifyStatus: null,
-    productSn: null,
-    productCategoryId: null,
-    brandId: null
+    goodsName:null,
+    goodsBrand: null,
+    goodsCode: null,
+    goodsState: null,
+    examineState: null,
+    classifyCode:null,
+    currentPage: 1,
+    pageSize: 10,
+  };
+  const defaultSecKill = {
+    id:null,
+    shopId:null,
+    sellerId: null,
+    goodsId: null,
+    goodsName: null,
+    normsId: null,
+    normsName:null,
+    type:null,
+    count:0,
+    spikePrice: 0,
+    oldPrice: 0,
+    startDate:null,
+    expireDate:null,
+    comments:null
   };
   export default {
     name: "productList",
+    components: { SecKill },
     data() {
       return {
-        editSkuInfo:{
-          dialogVisible:false,
-          productId:null,
-          productSn:'',
-          productAttributeCategoryId:null,
-          stockList:[],
-          productAttr:[],
-          keyword:null
-        },
+        imgUri:img.imagePath,
+        normsName1:"",
+        normsName2:"",
+        drawer:false,
+        editSkuInfo:[],
         operates: [
           {
             label: "商品上架",
@@ -343,6 +421,7 @@
         ],
         operateType: null,
         listQuery: Object.assign({}, defaultListQuery),
+        secKill: Object.assign({}, defaultSecKill),
         list: null,
         total: null,
         listLoading: true,
@@ -363,20 +442,21 @@
         }, {
           value: 0,
           label: '未审核'
+        }, {
+          value: -1,
+          label: '审核未通过'
         }]
       }
     },
     created() {
       this.getList();
-      this.getBrandList();
-      this.getProductCateList();
     },
     watch: {
       selectProductCateValue: function (newValue) {
         if (newValue != null && newValue.length == 2) {
-          this.listQuery.productCategoryId = newValue[1];
+          this.listQuery.goodsBrand = newValue[1];
         } else {
-          this.listQuery.productCategoryId = null;
+          this.listQuery.goodsBrand = null;
         }
 
       }
@@ -391,6 +471,68 @@
       }
     },
     methods: {
+      handleClose(done) {
+        done();
+      },
+      handleCloseDrawer(){
+        this.drawer=false;
+      },
+      clearState(value){
+        if(value==0){
+          this.listQuery.goodsState=null;
+        }else{
+          this.listQuery.examineState=null;
+        }
+      },
+      addSecKill(index,row,data){
+        this.secKill.shopId=data.shopId;
+        this.secKill.goodsId=data.id;
+        this.secKill.goodsName=data.goodsName;
+        this.secKill.normsId=row.id;
+        this.secKill.normsName=row.normsValue1+" "+row.normsValue2;
+        this.secKill.oldPrice=row.goodsPrice;
+        this.drawer=true;
+      },
+      handleToggleRow(row,expanded){
+        this.editSkuInfo=row.goodsNorms;
+      },
+      deleteNorms(index,row,data){
+        let list =data;
+        if(list.length==1){
+          Message.warning("只有一条数据不允许删除!")
+          return;
+        }
+        if(row.id!=null){
+          deleteGoodsNorms(row.id).then(res=>{
+            if(res.code==0){
+              if (list.length === 1) {
+                list.pop();
+              } else {
+                list.splice(index, 1);
+              }
+            }else{
+              Message.warning(res.msg)
+            }
+          })
+        }
+
+      },
+      saveNorms(index,row){
+        saveGoodsNorms(row).then(res=>{
+          if(res.code==0){
+            Message.success(res.msg)
+          }else {
+            Message.warning(res.msg)
+          }
+        })
+      },
+      addNorms(row){
+        let newNorms=Object.assign({}, defaultGoodsNorms);
+          newNorms.goodsId=row.goodsId;
+          newNorms.normsName1=row.normsName1,
+          newNorms.normsName2=row.normsName2,
+        this.editSkuInfo.push(newNorms)
+      },
       getProductSkuSp(row, index) {
         let spData = JSON.parse(row.spData);
         if(spData!=null&&index<spData.length){
@@ -400,11 +542,15 @@
         }
       },
       getList() {
-        this.listLoading = true;
-        fetchList(this.listQuery).then(response => {
+        this.listLoading = false;
+        fetchList(this.listQuery).then(res => {
+          if(res.code!=0){
+            Message.warning(res.msg)
+          }
           this.listLoading = false;
-          this.list = response.data.list;
-          this.total = response.data.total;
+          this.list = res.data.items;
+
+          this.total = res.data.totalNum;
         });
       },
       getBrandList() {
@@ -416,40 +562,11 @@
           }
         });
       },
-      getProductCateList() {
-        fetchListWithChildren().then(response => {
-          let list = response.data;
-          this.productCateOptions = [];
-          for (let i = 0; i < list.length; i++) {
-            let children = [];
-            if (list[i].children != null && list[i].children.length > 0) {
-              for (let j = 0; j < list[i].children.length; j++) {
-                children.push({label: list[i].children[j].name, value: list[i].children[j].id});
-              }
-            }
-            this.productCateOptions.push({label: list[i].name, value: list[i].id, children: children});
-          }
-        });
-      },
       handleShowSkuEditDialog(index,row){
         this.editSkuInfo.dialogVisible=true;
-        this.editSkuInfo.productId=row.id;
-        this.editSkuInfo.productSn=row.productSn;
-        this.editSkuInfo.productAttributeCategoryId = row.productAttributeCategoryId;
-        this.editSkuInfo.keyword=null;
-        fetchSkuStockList(row.id,{keyword:this.editSkuInfo.keyword}).then(response=>{
-          this.editSkuInfo.stockList=response.data;
-        });
-        if(row.productAttributeCategoryId!=null){
-          fetchProductAttrList(row.productAttributeCategoryId,{type:0}).then(response=>{
-            this.editSkuInfo.productAttr=response.data.list;
-          });
-        }
-      },
-      handleSearchEditSku(){
-        fetchSkuStockList(this.editSkuInfo.productId,{keyword:this.editSkuInfo.keyword}).then(response=>{
-          this.editSkuInfo.stockList=response.data;
-        });
+        this.editSkuInfo.stockList=row.goodsNorms;
+        this.normsName1=row.goodsNorms[0].normsName1;
+        this.normsName2=row.goodsNorms[0].normsName2;
       },
       handleEditSkuConfirm(){
         if(this.editSkuInfo.stockList==null||this.editSkuInfo.stockList.length<=0){
@@ -465,7 +582,8 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(()=>{
-          updateSkuStockList(this.editSkuInfo.productId,this.editSkuInfo.stockList).then(response=>{
+          updateGoodsNorms({"normsList":this.editSkuInfo.stockList}).then(res=>{
+            console.log(res)
             this.$message({
               message: '修改成功',
               type: 'success',
@@ -476,112 +594,82 @@
         });
       },
       handleSearchList() {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.getList();
       },
       handleAddProduct() {
         this.$router.push({path:'/pms/addProduct'});
       },
-      handleBatchOperate() {
-        if(this.operateType==null){
-          this.$message({
-            message: '请选择操作类型',
-            type: 'warning',
-            duration: 1000
-          });
-          return;
-        }
-        if(this.multipleSelection==null||this.multipleSelection.length<1){
-          this.$message({
-            message: '请选择要操作的商品',
-            type: 'warning',
-            duration: 1000
-          });
-          return;
-        }
-        this.$confirm('是否要进行该批量操作?', '提示', {
+      handleDelete(index,row){
+
+        this.$confirm('是否删除该商品?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          let ids=[];
-          for(let i=0;i<this.multipleSelection.length;i++){
-            ids.push(this.multipleSelection[i].id);
-          }
-          switch (this.operateType) {
-            case this.operates[0].value:
-              this.updatePublishStatus(1,ids);
-              break;
-            case this.operates[1].value:
-              this.updatePublishStatus(0,ids);
-              break;
-            case this.operates[2].value:
-              this.updateRecommendStatus(1,ids);
-              break;
-            case this.operates[3].value:
-              this.updateRecommendStatus(0,ids);
-              break;
-            case this.operates[4].value:
-              this.updateNewStatus(1,ids);
-              break;
-            case this.operates[5].value:
-              this.updateNewStatus(0,ids);
-              break;
-            case this.operates[6].value:
-              break;
-            case this.operates[7].value:
-              this.updateDeleteStatus(1,ids);
-              break;
-            default:
-              break;
-          }
-          this.getList();
-        });
+          deleteGoodsMsg(row.goodsMsg.id).then(res=>{
+            if(res.code==0){
+              this.$message.success(res.msg)
+              this.getList();
+            }else {
+              this.$message.warning(res.msg)
+            }
+          })
+        })
       },
       handleSizeChange(val) {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.listQuery.pageSize = val;
         this.getList();
       },
       handleCurrentChange(val) {
-        this.listQuery.pageNum = val;
+        this.listQuery.currentPage = val;
         this.getList();
       },
       handleSelectionChange(val) {
         this.multipleSelection = val;
       },
       handlePublishStatusChange(index, row) {
-        let ids = [];
-        ids.push(row.id);
-        this.updatePublishStatus(row.publishStatus, ids);
+        updateGoodsStatus({"goodsId":row.goodsMsg.id,"goodsState":row.goodsMsg.goodsState}).then(res=>{
+          if(res.code==0){
+              Message.success(res.msg)
+            this.getList();
+          }
+        })
+      },
+      handleNoticeStatusChange(index,row){
+        updateNoticeStatus({"goodsId":row.goodsMsg.id,"goodsNotice":row.goodsMsg.goodsNotice})
+          .then(res=>{
+            if(res.code==0){
+              Message.success(res.msg)
+              this.getList();
+            }
+          })
       },
       handleNewStatusChange(index, row) {
-        let ids = [];
-        ids.push(row.id);
-        this.updateNewStatus(row.newStatus, ids);
+        updateNewsState({"goodsId":row.goodsMsg.id,"goodsNews":row.goodsMsg.goodsNews}).then(res=>{
+          if(res.code==0){
+            Message.success(res.msg)
+            this.getList();
+          }
+        })
       },
       handleRecommendStatusChange(index, row) {
-        let ids = [];
-        ids.push(row.id);
-        this.updateRecommendStatus(row.recommandStatus, ids);
+        updateRecommendStatus({"goodsId":row.goodsMsg.id,"goodsRecommend":row.goodsMsg.goodsRecommend})
+          .then(res=>{
+            if(res.code==0){
+              Message.success(res.msg)
+              this.getList();
+            }
+          })
+
       },
       handleResetSearch() {
         this.selectProductCateValue = [];
         this.listQuery = Object.assign({}, defaultListQuery);
       },
-      handleDelete(index, row){
-        this.$confirm('是否要进行删除操作?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          let ids = [];
-          ids.push(row.id);
-          this.updateDeleteStatus(1,ids);
-        });
-      },
       handleUpdateProduct(index,row){
-        this.$router.push({path:'/pms/updateProduct',query:{id:row.id}});
+        this.$router.push({path:'/pms/updateProduct',query:{id:row.goodsMsg.id}});
       },
       handleShowProduct(index,row){
         console.log("handleShowProduct",row);
@@ -591,30 +679,6 @@
       },
       handleShowLog(index,row){
         console.log("handleShowLog",row);
-      },
-      updatePublishStatus(publishStatus, ids) {
-        let params = new URLSearchParams();
-        params.append('ids', ids);
-        params.append('publishStatus', publishStatus);
-        updatePublishStatus(params).then(response => {
-          this.$message({
-            message: '修改成功',
-            type: 'success',
-            duration: 1000
-          });
-        });
-      },
-      updateNewStatus(newStatus, ids) {
-        let params = new URLSearchParams();
-        params.append('ids', ids);
-        params.append('newStatus', newStatus);
-        updateNewStatus(params).then(response => {
-          this.$message({
-            message: '修改成功',
-            type: 'success',
-            duration: 1000
-          });
-        });
       },
       updateRecommendStatus(recommendStatus, ids) {
         let params = new URLSearchParams();
@@ -628,22 +692,27 @@
           });
         });
       },
-      updateDeleteStatus(deleteStatus, ids) {
-        let params = new URLSearchParams();
-        params.append('ids', ids);
-        params.append('deleteStatus', deleteStatus);
-        updateDeleteStatus(params).then(response => {
-          this.$message({
-            message: '删除成功',
-            type: 'success',
-            duration: 1000
-          });
-        });
-        this.getList();
-      }
     }
   }
 </script>
-<style></style>
+<style scoped>
+  .img-container{
+    position: relative;
+    width: 120px;
+    height: 120px;
+  }
+  .img-container .img{
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+  .button{
+    width: 80px;
+    margin:0 30px;
+  }
+  .el-button{
+    margin: 5px;
+  }
+</style>
 
 

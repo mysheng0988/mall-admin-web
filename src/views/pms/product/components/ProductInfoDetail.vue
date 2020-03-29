@@ -1,177 +1,218 @@
 <template>
   <div style="margin-top: 50px">
-    <el-form :model="value" :rules="rules" ref="productInfoForm" label-width="120px" style="width: 600px" size="small">
-      <el-form-item label="商品分类：" prop="productCategoryId">
-        <el-cascader
-          v-model="selectProductCateValue"
-          :options="productCateOptions">
-        </el-cascader>
-      </el-form-item>
-      <el-form-item label="商品名称：" prop="name">
-        <el-input v-model="value.name"></el-input>
-      </el-form-item>
-      <el-form-item label="副标题：" prop="subTitle">
-        <el-input v-model="value.subTitle"></el-input>
-      </el-form-item>
-      <el-form-item label="商品品牌：" prop="brandId">
-        <el-select
-          v-model="value.brandId"
-          @change="handleBrandChange"
-          placeholder="请选择品牌">
+    <el-form :model="goodsMsgParam" :rules="rules" ref="productInfoForm" label-width="120px" style="width: 600px" size="small">
+      <el-form-item label="店铺名称："  prop="shopId" >
+        <el-select filterable placeholder="请选择" v-model="goodsMsgParam.shopId" style="width: 100%" @change="shopSelect">
           <el-option
-            v-for="item in brandOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
+            v-for="item in shopList"
+            :key="item.id"
+            :label="item.shopName"
+            :value="item.id">
           </el-option>
         </el-select>
       </el-form-item>
-      <el-form-item label="商品介绍：">
+      <el-form-item label="商品分类：">
+        <el-cascader
+          size="medium"
+          style="width: 100%"
+          v-model="goodsClassify"
+          :filterable="true"
+          :clearable="true"
+          :options="productCateOptions"
+          @change="handleChange">
+        </el-cascader>
+      </el-form-item>
+      <el-form-item label="商品名称：" prop="goodsName">
+        <el-input v-model="goodsMsgParam.goodsName"></el-input>
+      </el-form-item>
+      <el-form-item label="自定义分类：">
+        <el-select filterable placeholder="请选择" v-model="goodsMsgParam.classifyCode" style="width: 100%" >
+          <el-option
+            v-for="item in customClassOptions"
+            :key="item.id"
+            :label="item.className"
+            :value="item.id">
+          </el-option>
+        </el-select>
+      </el-form-item>
+      <el-form-item label="副标题：" prop="goodsTitle">
+        <el-input v-model="goodsMsgParam.goodsTitle"></el-input>
+      </el-form-item>
+      <el-form-item label="商品品牌：">
+        <el-input v-model="goodsMsgParam.goodsBrand"></el-input>
+      </el-form-item>
+      <el-form-item label="商品编码：">
+        <el-input v-model="goodsMsgParam.goodsCode"></el-input>
+      </el-form-item>
+      <!--<el-form-item label="赠送积分：">-->
+        <!--<el-input v-model="param.giftPoint"></el-input>-->
+      <!--</el-form-item>-->
+      <el-form-item label="商品推荐：">
+        <span style="margin-right: 10px">新品</span>
+        <el-switch
+          v-model="goodsMsgParam.goodsNews"
+          :active-value="1"
+          :inactive-value="0">
+        </el-switch>
+        <span style="margin-left: 10px;margin-right: 10px">推荐</span>
+        <el-switch
+          v-model="goodsMsgParam.goodsRecommend"
+          :active-value="1"
+          :inactive-value="0">
+        </el-switch>
+        <span style="margin-left: 10px;margin-right: 10px">预告</span>
+        <el-switch
+          v-model="goodsMsgParam.goodsNotice"
+          :active-value="1"
+          :inactive-value="0">
+        </el-switch>
+      </el-form-item>
+      <el-form-item label="商品销量：">
+        <el-input v-model="goodsMsgParam.salesVolume"></el-input>
+      </el-form-item>
+      <el-form-item label="商品备注：">
         <el-input
-          :autoSize="true"
-          v-model="value.description"
+          class="textarea"
+          placeholder="请输入内容"
           type="textarea"
-          placeholder="请输入内容"></el-input>
+          v-model="goodsMsgParam.comments"
+          :autosize="true"
+          maxlength="100"
+          show-word-limit
+          clearable></el-input>
       </el-form-item>
-      <el-form-item label="商品货号：">
-        <el-input v-model="value.productSn"></el-input>
-      </el-form-item>
-      <el-form-item label="商品售价：">
-        <el-input v-model="value.price"></el-input>
-      </el-form-item>
-      <el-form-item label="市场价：">
-        <el-input v-model="value.originalPrice"></el-input>
-      </el-form-item>
-      <el-form-item label="商品库存：">
-        <el-input v-model="value.stock"></el-input>
-      </el-form-item>
-      <el-form-item label="计量单位：">
-        <el-input v-model="value.unit"></el-input>
-      </el-form-item>
-      <el-form-item label="商品重量：">
-        <el-input v-model="value.weight" style="width: 300px"></el-input>
-        <span style="margin-left: 20px">克</span>
-      </el-form-item>
-      <el-form-item label="排序">
-        <el-input v-model="value.sort"></el-input>
+      <el-form-item label="服务保证：">
+        <el-checkbox-group v-model="selectService" @change="checkChange" >
+          <!--<el-checkbox v-for="item in serviceList" :label="item" :key="item">{{item}}</el-checkbox>-->
+          <el-checkbox label="店铺发货售后" disabled>店铺发货售后</el-checkbox>
+          <el-checkbox label="正品保障" disabled>正品保障</el-checkbox>
+          <el-checkbox label="假一罚十" disabled>假一罚十</el-checkbox>
+          <el-checkbox label="货到付款">货到付款</el-checkbox>
+          <el-checkbox label="七天退换货">七天退换货</el-checkbox>
+          <el-checkbox label="市区内两个小时到货">市区内两个小时到货</el-checkbox>
+        </el-checkbox-group>
       </el-form-item>
       <el-form-item style="text-align: center">
-        <el-button type="primary" size="medium" @click="handleNext('productInfoForm')">下一步，填写商品促销</el-button>
+        <el-button type="primary" size="medium" @click="handleNext('productInfoForm')">下一步，填写商品属性</el-button>
       </el-form-item>
     </el-form>
   </div>
 </template>
 
 <script>
-  import {fetchListWithChildren} from '@/api/productCate'
-  import {fetchList as fetchBrandList} from '@/api/brand'
-  import {getProduct} from '@/api/product';
-
+  import {customClassShopId} from '@/api/classify'
+  import {getProduct,classifyList} from '@/api/product';
+  import {saveGoods,getGoodsMsg} from '@/api/goods';
+  import {findShop} from '@/api/shop';
+  const defaultProductParam = {
+    id: null,
+    shopId: '',
+    goodsBrand: '',
+    goodsCode: '',
+    classifyCode:null,
+    goodsName: '',
+    goodsTitle: '',
+    oneCode:0,
+    twoCode:0,
+    threeCode:0,
+    goodsState: 0,
+    examineState: 0,
+    goodsNews: 0,
+    goodsRecommend: 0,
+    goodsNotice: 0,
+    goodsEnsure:"",
+    salesVolume: 0,
+    comments:"",
+  };
   export default {
     name: "ProductInfoDetail",
     props: {
-      value: Object,
       isEdit: {
         type: Boolean,
         default: false
-      }
+      },
+      goodsId: {
+        type: String,
+        default: ""
+      },
     },
     data() {
       return {
-        hasEditCreated:false,
-        //选中商品分类的值
-        selectProductCateValue: [],
-        productCateOptions: [],
-        brandOptions: [],
+        shopList:[],
+        goodsClassify:[],
+        productCateOptions:[],
+        customClassOptions:[],
+        goodsMsgParam: Object.assign({},defaultProductParam),
+        selectService:['店铺发货售后','正品保障','假一罚十'],
         rules: {
-          name: [
+          goodsName: [
             {required: true, message: '请输入商品名称', trigger: 'blur'},
             {min: 2, max: 140, message: '长度在 2 到 140 个字符', trigger: 'blur'}
           ],
-          subTitle: [{required: true, message: '请输入商品副标题', trigger: 'blur'}],
-          productCategoryId: [{required: true, message: '请选择商品分类', trigger: 'blur'}],
-          brandId: [{required: true, message: '请选择商品品牌', trigger: 'blur'}],
-          description: [{required: true, message: '请输入商品介绍', trigger: 'blur'}],
-          requiredProp: [{required: true, message: '该项为必填项', trigger: 'blur'}]
+          goodsTitle: [{required: true, message: '请输入商品副标题', trigger: 'blur'}],
+          shopId:[{required: true, message: '请选择店铺', trigger: 'blur'}],
+          oneCode: [{required: true, message: '请选择商品分类', trigger: 'blur'}],
         }
       };
     },
     created() {
-      this.getProductCateList();
-      this.getBrandList();
-    },
-    computed:{
-      //商品的编号
-      productId(){
-        return this.value.id;
+      this.getClassifyList();
+      this.handleInitShop();
+
+      if(this.isEdit){
+        getGoodsMsg(this.goodsId).then(res=>{
+          let data=res.data;
+          console.log(data)
+          this.goodsMsgParam=res.data;
+          this.goodsClassify[0]=data.oneCode;
+          this.goodsClassify[1]=data.twoCode;
+          this.goodsClassify[2]=data.threeCode;
+          this.selectService=data.goodsEnsure.split(",")
+        })
       }
-    },
-    watch: {
-      productId:function(newValue){
-        if(!this.isEdit)return;
-        if(this.hasEditCreated)return;
-        if(newValue===undefined||newValue==null||newValue===0)return;
-        this.handleEditCreated();
-      },
-      selectProductCateValue: function (newValue) {
-        if (newValue != null && newValue.length === 2) {
-          this.value.productCategoryId = newValue[1];
-          this.value.productCategoryName= this.getCateNameById(this.value.productCategoryId);
-        } else {
-          this.value.productCategoryId = null;
-          this.value.productCategoryName=null;
-        }
-      }
+
+
     },
     methods: {
-      //处理编辑逻辑
-      handleEditCreated(){
-        if(this.value.productCategoryId!=null){
-          this.selectProductCateValue.push(this.value.cateParentId);
-          this.selectProductCateValue.push(this.value.productCategoryId);
-        }
-        this.hasEditCreated=true;
+
+      handleChange(value){
+        this.goodsMsgParam.oneCode=value[0];
+        this.goodsMsgParam.twoCode=value[1];
+        this.goodsMsgParam.threeCode=value[2];
       },
-      getProductCateList() {
-        fetchListWithChildren().then(response => {
-          let list = response.data;
-          this.productCateOptions = [];
-          for (let i = 0; i < list.length; i++) {
-            let children = [];
-            if (list[i].children != null && list[i].children.length > 0) {
-              for (let j = 0; j < list[i].children.length; j++) {
-                children.push({label: list[i].children[j].name, value: list[i].children[j].id});
-              }
-            }
-            this.productCateOptions.push({label: list[i].name, value: list[i].id, children: children});
-          }
+      handleInitShop(){
+        this.loading=true;
+        findShop().then((res) => {
+          this.shopList=res.data;
+          this.loading = false;
+        }).catch(() => {
+          this.loading = false
+        })
+      },
+      shopSelect(e){
+        this.goodsMsgParam.shopId=e;
+        this.goodsMsgParam.classifyCode=null;
+        customClassShopId(this.goodsMsgParam.shopId).then(res=>{
+          console.log(res)
+          this.customClassOptions=res.data;
+        })
+      },
+      checkChange(){
+       this.goodsMsgParam.goodsEnsure=this.selectService.join(",")
+      },
+      getClassifyList(){
+        classifyList().then(response => {
+          let data=response.data;
+          this.productCateOptions =data;
+
         });
-      },
-      getBrandList() {
-        fetchBrandList({pageNum: 1, pageSize: 100}).then(response => {
-          this.brandOptions = [];
-          let brandList = response.data.list;
-          for (let i = 0; i < brandList.length; i++) {
-            this.brandOptions.push({label: brandList[i].name, value: brandList[i].id});
-          }
-        });
-      },
-      getCateNameById(id){
-        let name=null;
-        for(let i=0;i<this.productCateOptions.length;i++){
-          for(let j=0;j<this.productCateOptions[i].children.length;j++){
-            if(this.productCateOptions[i].children[j].value===id){
-              name=this.productCateOptions[i].children[j].label;
-              return name;
-            }
-          }
-        }
-        return name;
       },
       handleNext(formName){
         this.$refs[formName].validate((valid) => {
           if (valid) {
-            this.$emit('nextStep');
+            this.goodsMsgParam.goodsEnsure=this.selectService.join(",")
+            this.$emit('nextStep',this.goodsMsgParam);
+
           } else {
             this.$message({
               message: '验证失败',
@@ -182,19 +223,13 @@
           }
         });
       },
-      handleBrandChange(val) {
-        let brandName = '';
-        for (let i = 0; i < this.brandOptions.length; i++) {
-          if (this.brandOptions[i].value === val) {
-            brandName = this.brandOptions[i].label;
-            break;
-          }
-        }
-        this.value.brandName = brandName;
-      }
     }
   }
 </script>
 
-<style scoped>
+<style >
+  .el-checkbox__input.is-disabled+span.el-checkbox__label {
+     color: #409EFF!important;
+    cursor: not-allowed;
+  }
 </style>

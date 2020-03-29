@@ -27,3 +27,7 @@
     }
   }
 }
+ .home .el-table__body tr.current-row>td {
+   background-color: #409EFF !important;
+   color: #fff;
+ }

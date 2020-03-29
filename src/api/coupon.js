@@ -1,15 +1,14 @@
 import request from '@/utils/request'
 export function fetchList(params) {
   return request({
-    url:'/coupon/list',
-    method:'get',
-    params:params
+    url:'office/coupon/couponAll',
+    method:'post',
+    data:params
   })
 }
-
 export function createCoupon(data) {
   return request({
-    url:'/coupon/create',
+    url:'/office/coupon/createCoupon',
     method:'post',
     data:data
   })
@@ -17,14 +16,14 @@ export function createCoupon(data) {
 
 export function getCoupon(id) {
   return request({
-    url:'/coupon/'+id,
+    url:'/office/coupon/getCoupon?id='+id,
     method:'get',
   })
 }
 
 export function updateCoupon(id,data) {
   return request({
-    url:'/coupon/update/'+id,
+    url:'/office/coupon/update',
     method:'post',
     data:data
   })
@@ -32,7 +31,7 @@ export function updateCoupon(id,data) {
 
 export function deleteCoupon(id) {
   return request({
-    url:'/coupon/delete/'+id,
-    method:'post',
+    url:'/office/coupon/delete?id='+id,
+    method:'get',
   })
 }

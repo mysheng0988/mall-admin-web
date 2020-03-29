@@ -1,9 +1,35 @@
 import request from '@/utils/request'
 export function fetchList(params) {
   return request({
-    url:'/product/list',
+    url:'/office/wares/queryGoods',
+    method:'post',
+    data:params
+  })
+}
+export function updateGoodsNorms(params) {
+  return request({
+    url:'/office/wares/updateNorms',
+    method:'post',
+    data:params
+  })
+}
+export function saveGoodsNorms(params) {
+  return request({
+    url:'/office/wares/saveNorms',
+    method:'post',
+    data:params
+  })
+}
+export function deleteGoodsNorms(params) {
+  return request({
+    url:'/office/wares/deleteNorms/'+params,
     method:'get',
-    params:params
+  })
+}
+export function classifyList() {
+  return request({
+    url:'/office/classify/list',
+    method:'post'
   })
 }
 
@@ -14,36 +40,42 @@ export function fetchSimpleList(params) {
     params:params
   })
 }
-
-export function updateDeleteStatus(params) {
+export function deleteGoodsMsg(params) {
   return request({
-    url:'/product/update/deleteStatus',
-    method:'post',
-    params:params
+    url:'/office/wares/goodsMsg/'+params,
+    method:'get',
   })
 }
 
-export function updateNewStatus(params) {
+export function updateGoodsStatus(params) {
   return request({
-    url:'/product/update/newStatus',
+    url:'/office/wares/updateState',
     method:'post',
-    params:params
+    data:params
+  })
+}
+
+export function updateNewsState(params) {
+  return request({
+    url:'/office/wares/newsState',
+    method:'post',
+    data:params
   })
 }
 
 export function updateRecommendStatus(params) {
   return request({
-    url:'/product/update/recommendStatus',
+    url:'/office/wares/recommendState',
     method:'post',
-    params:params
+    data:params
   })
 }
 
-export function updatePublishStatus(params) {
+export function updateNoticeStatus(params) {
   return request({
-    url:'/product/update/publishStatus',
+    url:'/office/wares/noticeState',
     method:'post',
-    params:params
+    data:params
   })
 }
 
@@ -55,18 +87,7 @@ export function createProduct(data) {
   })
 }
 
-export function updateProduct(id,data) {
-  return request({
-    url:'/product/update/'+id,
-    method:'post',
-    data:data
-  })
-}
 
-export function getProduct(id) {
-  return request({
-    url:'/product/updateInfo/'+id,
-    method:'get',
-  })
-}
+
+
 

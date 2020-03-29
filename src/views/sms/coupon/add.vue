@@ -1,5 +1,7 @@
 <template> 
-  <coupon-detail :isEdit="false"></coupon-detail>
+  <div class="app-container">
+    <coupon-detail :isEdit="false"></coupon-detail>
+  </div>
 </template>
 <script>
   import CouponDetail from './components/CouponDetail'

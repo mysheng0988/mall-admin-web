@@ -4,26 +4,24 @@
       <div>
         <i class="el-icon-search"></i>
         <span>筛选搜索</span>
-        <el-button
-          style="float:right"
-          type="primary"
-          @click="handleSearchList()"
-          size="small">
-          查询搜索
-        </el-button>
-        <el-button
-          style="float:right;margin-right: 15px"
-          @click="handleResetSearch()"
-          size="small">
-          重置
-        </el-button>
+
       </div>
       <div style="margin-top: 15px">
         <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
-          <el-form-item label="广告名称：">
-            <el-input v-model="listQuery.name" class="input-width" placeholder="广告名称"></el-input>
+          <el-form-item label="选择店铺">
+            <el-select filterable placeholder="按店铺查询" v-model="listQuery.shopId" style="width: 100%" @change="shopSelect" clearable @clear="clearState()">
+              <el-option
+                v-for="item in shopList"
+                :key="item.id"
+                :label="item.shopName"
+                :value="item.id">
+              </el-option>
+            </el-select>
           </el-form-item>
-          <el-form-item label="广告位置：">
+          <el-form-item label="广告名称">
+            <el-input v-model="listQuery.title" class="input-width" placeholder="广告名称"></el-input>
+          </el-form-item>
+          <el-form-item label="广告位置">
             <el-select v-model="listQuery.type" placeholder="全部" clearable class="input-width">
               <el-option v-for="item in typeOptions"
                          :key="item.value"
@@ -32,16 +30,51 @@
               </el-option>
             </el-select>
           </el-form-item>
-          <el-form-item label="到期时间：">
+          <el-form-item label="广告状态">
+            <el-select v-model="listQuery.state" placeholder="全部" clearable class="input-width">
+              <el-option v-for="item in stateOptions"
+                         :key="item.value"
+                         :label="item.label"
+                         :value="item.value">
+              </el-option>
+            </el-select>
+          </el-form-item>
+          <el-form-item label="开始时间">
             <el-date-picker
               class="input-width"
-              v-model="listQuery.endTime"
+              v-model="listQuery.startDate"
               value-format="yyyy-MM-dd"
               type="date"
+              :pickerOptions="pickerOptions0"
+              placeholder="请选择时间">
+            </el-date-picker>
+          </el-form-item>
+          <el-form-item label="到期时间">
+            <el-date-picker
+              class="input-width"
+              v-model="listQuery.expireDate"
+              value-format="yyyy-MM-dd"
+              type="date"
+              :pickerOptions="pickerOptions1"
               placeholder="请选择时间">
             </el-date-picker>
           </el-form-item>
         </el-form>
+      </div>
+      <div style="text-align: right">
+        <el-button
+          class="button"
+          @click="handleSearchList()"
+          type="primary"
+          size="small">
+          查询结果
+        </el-button>
+        <el-button
+          class="button"
+          @click="handleResetSearch()"
+          size="small">
+          重置
+        </el-button>
       </div>
     </el-card>
     <el-card class="operate-container" shadow="never">
@@ -56,39 +89,30 @@
                 @selection-change="handleSelectionChange"
                 v-loading="listLoading" border>
         <el-table-column type="selection" width="60" align="center"></el-table-column>
-        <el-table-column label="编号" width="120" align="center">
-          <template slot-scope="scope">{{scope.row.id}}</template>
-        </el-table-column>
         <el-table-column label="广告名称" align="center">
-          <template slot-scope="scope">{{scope.row.name}}</template>
+          <template slot-scope="scope">{{scope.row.title}}</template>
         </el-table-column>
         <el-table-column label="广告位置" width="120" align="center">
           <template slot-scope="scope">{{scope.row.type | formatType}}</template>
         </el-table-column>
-        <el-table-column label="广告图片" width="120" align="center">
-          <template slot-scope="scope"><img style="height: 80px" :src="scope.row.pic"></template>
-        </el-table-column>
-        <el-table-column label="时间" width="220" align="center">
+        <el-table-column label="广告图片" width="180" align="center">
           <template slot-scope="scope">
-            <p>开始时间：{{scope.row.startTime | formatTime}}</p>
-            <p>到期时间：{{scope.row.endTime | formatTime}}</p>
+            <el-image
+              style="width: 160px; height: 120px"
+              :src="imgUri+scope.row.imgPath"
+              fit="fit"></el-image>
           </template>
         </el-table-column>
-        <el-table-column label="上线/下线" width="120" align="center">
+        <el-table-column label="开始时间" width="220" align="center">
           <template slot-scope="scope">
-            <el-switch
-              @change="handleUpdateStatus(scope.$index, scope.row)"
-              :active-value="1"
-              :inactive-value="0"
-              v-model="scope.row.status">
-            </el-switch>
+              {{scope.row.startDate | formatTime}}
           </template>
         </el-table-column>
-        <el-table-column label="点击次数" width="120" align="center">
-          <template slot-scope="scope">{{scope.row.clickCount}}</template>
+        <el-table-column label="到期时间" width="220" align="center">
+          <template slot-scope="scope">{{scope.row.expireDate | formatTime}}</template>
         </el-table-column>
-        <el-table-column label="生成订单" width="120" align="center">
-          <template slot-scope="scope">{{scope.row.orderCount}}</template>
+        <el-table-column label="广告状态" width="120" align="center">
+          <template slot-scope="scope">{{scope.row.state | formatState}}</template>
         </el-table-column>
         <el-table-column label="操作" width="120" align="center">
           <template slot-scope="scope">
@@ -129,33 +153,47 @@
         background
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
-        layout="total, sizes,prev, pager, next,jumper"
+        layout="total,sizes,prev,pager,next,jumper"
         :page-size="listQuery.pageSize"
         :page-sizes="[5,10,15]"
-        :current-page.sync="listQuery.pageNum"
+        :current-page.sync="listQuery.currentPage"
         :total="total">
       </el-pagination>
     </div>
   </div>
 </template>
 <script>
+  import img from '@/components/common'
   import {fetchList,updateStatus,deleteHomeAdvertise} from '@/api/homeAdvertise';
   import {formatDate} from '@/utils/date';
+  import {findShop} from '@/api/shop';
   const defaultListQuery = {
-    pageNum: 1,
-    pageSize: 5,
-    name: null,
+    currentPage: 1,
+    pageSize: 10,
+    shopId: null,
+    title: null,
     type: null,
-    endTime:null
+    startDate:null,
+    expireDate:null,
   };
   const defaultTypeOptions = [
     {
-      label: 'PC首页轮播',
-      value: 0
+      label: '首页轮播',
+      value: "0"
     },
     {
-      label: 'APP首页轮播',
-      value: 1
+      label: '附近轮播',
+      value: "1"
+    }
+  ];
+  const defaultStateOptions = [
+    {
+      label: '未过期',
+      value: "0"
+    },
+    {
+      label: '已过期',
+      value: "1"
     }
   ];
   export default {
@@ -164,10 +202,30 @@
       return {
         listQuery: Object.assign({}, defaultListQuery),
         typeOptions: Object.assign({}, defaultTypeOptions),
+        stateOptions: Object.assign({}, defaultStateOptions),
+        shopList:[],
+        imgUri:img.imagePath,
         list: null,
         total: null,
         listLoading: false,
         multipleSelection: [],
+        pickerOptions0: {
+          disabledDate: (time) => {
+            if (this.listQuery.expireDate!=null) {
+              let expireDate=new Date(this.listQuery.expireDate);
+              return  time.getTime() > expireDate.getTime();
+            }
+
+          }
+        },
+        pickerOptions1: {
+          disabledDate: (time) => {
+            if(this.listQuery.startDate!=null){
+              let startDate=new Date(this.listQuery.startDate);
+              return time.getTime() < startDate.getTime();
+            }
+          }
+        },
         operates: [
           {
             label: "删除",
@@ -178,14 +236,29 @@
       }
     },
     created() {
+      findShop().then((res) => {
+        this.shopList=res.data;
+        this.loading = false;
+      }).catch(() => {
+        this.loading = false
+      })
       this.getList();
     },
     filters:{
       formatType(type){
-        if(type===1){
-          return 'APP首页轮播';
+        if(type==="1"){
+          return '附近轮播';
+        }else if(type==="0"){
+          return '首页轮播';
+        }else {
+          return '店铺轮播';
+        }
+      },
+      formatState(type){
+        if(type==="1"){
+          return '已过期';
         }else{
-          return 'PC首页轮播';
+          return '未过期';
         }
       },
       formatTime(time){
@@ -197,46 +270,33 @@
       },
     },
     methods: {
+      clearState(){
+        this.listQuery.shopId=null;
+        this.getList();
+      },
+      shopSelect(){
+        this.getList();
+      },
       handleResetSearch() {
         this.listQuery = Object.assign({}, defaultListQuery);
       },
       handleSearchList() {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.getList();
       },
       handleSelectionChange(val){
         this.multipleSelection = val;
       },
       handleSizeChange(val) {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.listQuery.pageSize = val;
         this.getList();
       },
       handleCurrentChange(val) {
-        this.listQuery.pageNum = val;
+        this.listQuery.currentPage = val;
         this.getList();
       },
-      handleUpdateStatus(index,row){
-        this.$confirm('是否要修改上线/下线状态?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          updateStatus(row.id,{status:row.status}).then(response=>{
-            this.getList();
-            this.$message({
-              type: 'success',
-              message: '修改成功!'
-            });
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'success',
-            message: '已取消操作!'
-          });
-          this.getList();
-        });
-      },
+
       handleDelete(index,row){
         this.deleteHomeAdvertise(row.id);
       },
@@ -254,7 +314,6 @@
           ids.push(this.multipleSelection[i].id);
         }
         if(this.operateType===0){
-          //删除
           this.deleteHomeAdvertise(ids);
         }else {
           this.$message({
@@ -272,10 +331,17 @@
       },
       getList() {
         this.listLoading = true;
-        fetchList(this.listQuery).then(response => {
+        fetchList(this.listQuery).then(res => {
           this.listLoading = false;
-          this.list = response.data.list;
-          this.total = response.data.total;
+          if(res.code==0){
+            this.list = res.data.items;
+            this.total = res.data.totalNum;
+          }else {
+            this.$message.warning(res.msg)
+            this.listLoading = false;
+            this.list=[]
+            this.total=0;
+          }
         })
       },
       deleteHomeAdvertise(ids){
@@ -284,14 +350,19 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          let params=new URLSearchParams();
-          params.append("ids",ids);
-          deleteHomeAdvertise(params).then(response=>{
-            this.getList();
-            this.$message({
-              type: 'success',
-              message: '删除成功!'
-            });
+          deleteHomeAdvertise(ids).then(res=>{
+            if(res.code==0){
+              this.getList();
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+            }else{
+              this.$message({
+                type: 'warning',
+                message: res.msg
+              });
+            }
           });
         })
       }
