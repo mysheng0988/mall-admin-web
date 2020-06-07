@@ -1,8 +1,9 @@
 import axios from 'axios'
-import { Message, MessageBox } from 'element-ui'
+import {Loading, Message, MessageBox } from 'element-ui'
 import store from '../store'
+import router from '@/router/index';
 import { getToken } from '@/utils/auth'
-
+var loadinginstace;
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
@@ -11,25 +12,31 @@ const service = axios.create({
 
 // request拦截器
 service.interceptors.request.use(config => {
+  loadinginstace = Loading.service({ fullscreen: true })
   if (store.getters.token) {
     config.headers['token'] = getToken() // 让每个请求携带自定义token 请根据实际情况自行修改
   }
   return config
 }, error => {
-  // Do something with request error
-  console.log(error) // for debug
+  loadinginstace.close();
   Promise.reject(error)
 })
 
 // respone拦截器
 service.interceptors.response.use(
   response => {
-    const res = response.data
+    const res = response.data;
+    loadinginstace.close();
     if(res.code==0||res.code==1){
       return response.data
     }else if(res.code==401){
       sessionStorage.clear();
-
+      Message({
+        message:"登录信息已过期",
+        type: 'error',
+        duration: 3 * 1000
+      })
+      router.push({path:"/login"})
     }else{
       Message({
         message: res.msg,
@@ -41,7 +48,7 @@ service.interceptors.response.use(
     }
   },
   err => {
-    console.log('err' + err)// for debug
+    loadinginstace.close();
     Message({
       message: "服务器调皮了",
       type: 'error',

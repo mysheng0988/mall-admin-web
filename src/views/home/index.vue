@@ -96,19 +96,9 @@
     <user-goods-msg :shop-id="selectData.id"></user-goods-msg>
     <order-statistics :shop-id="selectData.id"></order-statistics>
 
-    <!--<viewer :images="photo" title="大计算机安检">-->
-      <!--<el-row :gutter="20">-->
-        <!--<el-col :span="8" v-for="(src,index) in photo"  :key="index">-->
-          <!--<div class="viewer">-->
-            <!--<img :src="src" >-->
-          <!--</div>-->
-      <!--</el-col>-->
-
-      <!--</el-row>-->
-    <!--</viewer>-->
     <el-dialog :visible.sync="qrDialog" width="420px">
       <qrcode :q-text="qText" :q-size="qSize" :d-name="dName"></qrcode>
-      <vue-barcode v-bind:value="qText"></vue-barcode>
+      <vue-barcode :value="qText"></vue-barcode>
     </el-dialog>
 
   </div>
@@ -120,6 +110,13 @@
   import img_home_order from '@/assets/images/home_order.png';
   import img_home_today_amount from '@/assets/images/home_today_amount.png';
   import img_home_yesterday_amount from '@/assets/images/home_yesterday_amount.png';
+  import SalesVolume from "./components/SalesVolume"
+  import AwaitHandle from "./components/AwaitHandle"
+  import UserGoodsMsg from "./components/UserGoodsMsg"
+  import OrderStatistics from "./components/OrderStatistics"
+  import qrcode from "@/components/qrcode/qrcode"
+  import VueBarcode from "vue-barcode"
+  import {findShop} from "../../api/shop";
   const DATA_FROM_BACKEND = {
     columns: ['date', 'orderCount','orderAmount'],
     rows: [
@@ -153,7 +150,12 @@
     },
     data() {
       return {
-
+        selectData:[],
+        qrDialog:false,
+        qText:"",
+        dName:"",
+        qSize:300,
+        list:[],
         pickerOptions: {
           shortcuts: [{
             text: '最近一周',
@@ -184,8 +186,8 @@
           xAxisType: 'time',
           area:true,
           axisSite: { right: ['orderAmount']},
-        labelMap: {'orderCount': '订单数量', 'orderAmount': '订单金额'}},
-        chartData: {
+          labelMap: {'orderCount': '订单数量', 'orderAmount': '订单金额'}},
+         chartData: {
           columns: [],
           rows: []
         },
@@ -231,7 +233,6 @@
       handleInitShop(){
         this.loading=true;
         findShop().then((res) => {
-          console.log(res)
           this.list=res.data;
           this.loading = false;
           this.checkedData();

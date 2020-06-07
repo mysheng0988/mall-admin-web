@@ -93,9 +93,9 @@
       return {
         list: null,
         total: null,
-        listLoading: true,
+        listLoading: false,
         listQuery: {
-          pageNum: 1,
+          cu: 1,
           pageSize: 5
         },
         parentId: 0
@@ -124,9 +124,9 @@
         this.$router.push('/ums/addMenu');
       },
       getList() {
-        this.listLoading = true;
+        //this.listLoading = true;
         fetchList(this.parentId, this.listQuery).then(response => {
-          this.listLoading = false;
+         // this.listLoading = false;
           this.list = response.data.list;
           this.total = response.data.total;
         });

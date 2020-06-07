@@ -27,8 +27,8 @@ export default {
       'routers'
     ]),
     routes() {
-      // return this.$router.options.routes
-      return this.routers
+      return this.$router.options.routes
+      //return this.routers
     },
     isCollapse() {
       return !this.sidebar.opened

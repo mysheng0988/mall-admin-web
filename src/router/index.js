@@ -29,10 +29,7 @@ export const constantRouterMap = [
       meta: {title: '店铺详情'},
       hidden: true
     }]
-  }
-]
-
-export const asyncRouterMap = [
+  },
   {
     path: '/pms',
     component: Layout,
@@ -128,6 +125,33 @@ export const asyncRouterMap = [
     ]
   },
   {
+    path: '/news',
+    component: Layout,
+    redirect: '/news/index',
+    name: 'news',
+    meta: {title: '新闻中心', icon: 'sms-new'},
+    children: [
+      {
+        path: 'index',
+        name: 'index',
+        component: () => import('@/views/news/index'),
+        meta: {title: '新闻中心', icon: 'sms-new'}
+      },
+      {
+        path: 'add',
+        name: 'add',
+        component: () => import('@/views/news/add'),
+        meta: {title: '增加新闻', icon: 'sms-new'}
+      },
+      {
+        path: 'update',
+        name: 'update',
+        component: () => import('@/views/news/update'),
+        meta: {title: '修改新闻', icon: 'sms'}
+      }
+    ]
+  },
+  {
     path: '/oms',
     component: Layout,
     redirect: '/oms/order',
@@ -182,10 +206,10 @@ export const asyncRouterMap = [
     ]
   },
   {
-    path: '',
-    name: '',
+    path: '/IM',
+    name: '/IM',
     component: Layout,
-    redirect: '/IM',
+    redirect: '/IM/shopIM',
     children: [
       {
         path: 'shopIM',
@@ -369,6 +393,18 @@ export const asyncRouterMap = [
         hidden: true
       }
     ]
+  },
+  {path: '',
+    component: Layout,
+    redirect: '/404',
+    hidden: true,
+    children: [{
+      path:'404',
+      name:"404",
+      component: () => import('@/views/404'),
+      meta: {title: '404', icon: 'sms-flash',roleId:[1,13,18]},
+      hidden: true
+    }]
   },
   {path: '*', redirect: '/404', hidden: true}
 ]

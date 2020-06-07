@@ -313,7 +313,7 @@
         this.getRoleListByAdmin(row.id);
       },
       getList() {
-        this.listLoading = true;
+        //this.listLoading = true;
         fetchList(this.listQuery).then(response => {
           this.listLoading = false;
           this.list = response.data.list;

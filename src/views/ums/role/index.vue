@@ -21,7 +21,7 @@
       <div style="margin-top: 15px">
         <el-form :inline="true" :model="listQuery" size="small" label-width="140px">
           <el-form-item label="输入搜索：">
-            <el-input v-model="listQuery.keyword" class="input-width" placeholder="角色名称" clearable></el-input>
+            <el-input v-model="listQuery.roleName" class="input-width" placeholder="角色名称" clearable></el-input>
           </el-form-item>
         </el-form>
       </div>
@@ -37,19 +37,16 @@
                 style="width: 100%;"
                 v-loading="listLoading" border>
         <el-table-column label="编号" width="100" align="center">
-          <template slot-scope="scope">{{scope.row.id}}</template>
+          <template slot-scope="scope">{{scope.$index+1}}</template>
         </el-table-column>
         <el-table-column label="角色名称" align="center">
-          <template slot-scope="scope">{{scope.row.name}}</template>
+          <template slot-scope="scope">{{scope.row.roleName}}</template>
         </el-table-column>
-        <el-table-column label="描述" align="center">
-          <template slot-scope="scope">{{scope.row.description}}</template>
+        <el-table-column label="角色类型" align="center">
+          <template slot-scope="scope">{{scope.row.roleType}}</template>
         </el-table-column>
-        <el-table-column label="用户数"  width="100" align="center">
-          <template slot-scope="scope">{{scope.row.adminCount}}</template>
-        </el-table-column>
-        <el-table-column label="添加时间" width="160" align="center">
-          <template slot-scope="scope">{{scope.row.createTime | formatDateTime}}</template>
+        <el-table-column label="添加时间"  align="center">
+          <template slot-scope="scope">{{scope.row.createDate | formatDateTime}}</template>
         </el-table-column>
         <el-table-column label="是否启用" width="140" align="center">
           <template slot-scope="scope">
@@ -94,7 +91,7 @@
         @size-change="handleSizeChange"
         @current-change="handleCurrentChange"
         layout="total, sizes,prev, pager, next,jumper"
-        :current-page.sync="listQuery.pageNum"
+        :current-page.sync="listQuery.currentPage"
         :page-size="listQuery.pageSize"
         :page-sizes="[5,10,15]"
         :total="total">
@@ -135,9 +132,9 @@
   import {formatDate} from '@/utils/date';
 
   const defaultListQuery = {
-    pageNum: 1,
+    currentPage: 1,
     pageSize: 5,
-    keyword: null
+    roleName: null
   };
   const defaultRole = {
     id: null,
@@ -176,16 +173,16 @@
         this.listQuery = Object.assign({}, defaultListQuery);
       },
       handleSearchList() {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.getList();
       },
       handleSizeChange(val) {
-        this.listQuery.pageNum = 1;
+        this.listQuery.currentPage = 1;
         this.listQuery.pageSize = val;
         this.getList();
       },
       handleCurrentChange(val) {
-        this.listQuery.pageNum = val;
+        this.listQuery.currentPage = val;
         this.getList();
       },
       handleAdd() {
@@ -271,10 +268,10 @@
         this.$router.push({path:'/ums/allocResource',query:{roleId:row.id}})
       },
       getList() {
-        this.listLoading = true;
+       // this.listLoading = true;
         fetchList(this.listQuery).then(response => {
-          this.listLoading = false;
-          this.list = response.data.list;
+         // this.listLoading = false;
+          this.list = response.data;
           this.total = response.data.total;
         });
       }

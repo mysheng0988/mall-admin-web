@@ -154,7 +154,6 @@
     position: absolute;
     right: 10px;
     top: 2px;
-    /*z-index: 2005;*/
   }
 
   .editor-upload-btn {
